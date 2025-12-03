@@ -190,13 +190,11 @@
     }
 
     function adjustSpeed(delta) {
-        const MIN_SPEED = 1.0;
-        const MAX_SPEED = 1.5; // Змінено з 2.0 на 1.5
-        
-        if (newSpeed < MIN_SPEED) {
-            newSpeed = MIN_SPEED;
-        } else if (newSpeed > MAX_SPEED) {
-            newSpeed = MAX_SPEED;
+        let newSpeed = audioPlayer.playbackRate + delta;
+        if (newSpeed < 1.0) newSpeed = 1.0;
+        if (newSpeed > 1.5) newSpeed = 1.5; // Тут було обмеження 2.0
+        audioPlayer.playbackRate = newSpeed;
+        speedDisplay.textContent = newSpeed.toFixed(2);
     }
 </script>
 
