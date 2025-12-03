@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Інструкції з Охорони Праці</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px 0 120px;
+            background-color: #000;
+            color: #fff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 2px solid #fff;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 1.3em; 
+            text-align: center;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        ol {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            padding: 15px 10px;
+            border-bottom: 1px dashed #444;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 1.1em;
+        }
+        li:hover {
+            background-color: #222;
+        }
+        li:last-child {
+            border-bottom: none;
+        }
+        a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+        }
+        #audio-controls-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #111;
+            border-top: 2px solid #fff;
+            padding: 10px 20px;
+            box-sizing: border-box;
+            display: none;
+            z-index: 1000;
+        }
+        #audio-player {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .speed-control {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; 
+        }
+        .speed-control button {
+            background-color: #fff;
+            color: #000;
+            border: 1px solid #000;
+            padding: 8px 15px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: background-color 0.2s;
+        }
+        .speed-control button:hover {
+            background-color: #ccc;
+        }
+        .speed-display {
+            font-weight: bold;
+            font-size: 1.2em;
+            width: 50px;
+            text-align: center;
+        }
+        .active-instruction {
+            background-color: #444;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Інструкції з охорони праці на робочому місці для Складів</h1>
+
+        <ol id="instruction-list">
+    <li data-file="vstup">Вступ</li>
+    <li data-file="iop3">1. ІОП №3 Для присвоєння 1 групи з електробезпеки</li>
+    <li data-file="iop5">2. ІОП №5 При користуванні електропобутовими приладами та офісною оргтехнікою</li>
+    <li data-file="iop8">3. ІОП №8 При роботі з ручним електроінструментом</li>
+    <li data-file="iop13">4. ІОП №13 При роботі з ручними візками</li>      
+    <li data-file="iop14">5. ІОП №14 При виконанні вантажно-розвантажувальних робіт</li>
+    <li data-file="iop16">6. ІОП №16 Для вантажника</li>
+    <li data-file="iop17">7. ІОП №17 Для комплектувальника</li>      
+    <li data-file="iop18">8. ІОП №18 Для комірника</li>
+    <li data-file="iop23">9. ІОП №23 Для водія навантажувача</li>
+    <li data-file="iop24">10. ІОП №24 Під час виконання робіт з робочої платформи</li>  
+    <li data-file="iop34">11. ІОП №34 Для помічника логіста</li>     
+    <li data-file="iop47">12. ІОП №47 Для користувача ПЕОМ</li>
+    <li><a href="first_aid.html">13. Порядок надання домедичної допомоги</a></li>
+</ol>
+    </div>
+
+    <div id="audio-controls-container">
+        <audio id="audio-player" controls preload="metadata"></audio>
+        <div class="speed-control">
+            <span>Швидкість:</span>
+            <div>
+                <span id="speed-display" class="speed-display">1.00</span>
+                <button onclick="adjustSpeed(-0.25)">-</button>
+                <button onclick="adjustSpeed(0.25)">+</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const audioPlayer = document.getElementById('audio-player');
+    const audioContainer = document.getElementById('audio-controls-container');
+    const speedDisplay = document.getElementById('speed-display');
+    
+    let currentActiveItem = null;
+
+    // ✅ ВИПРАВЛЕННЯ: Це тепер правильний шлях до папки 'audio/'
+    const BASE_AUDIO_URL = 'https://raw.githubusercontent.com/shylovak-spec/Audio_Assetss/main/audio/';
+
+    document.querySelectorAll('#instruction-list li[data-file]').forEach(item => {
+        item.addEventListener('click', function() {
+            loadAndPlay(this.getAttribute('data-file'), this);
+        });
+    });
+
+    function loadAndPlay(fileName, listItem) {
+        // Формування повного Raw URL-адреси
+        const mp3Src = `${BASE_AUDIO_URL}${fileName}.mp3`;
+        const oggSrc = `${BASE_AUDIO_URL}${fileName}.ogg`;
+
+        if (currentActiveItem === listItem && !audioPlayer.paused) {
+            audioPlayer.pause();
+            currentActiveItem.classList.remove('active-instruction');
+            currentActiveItem = null;
+            audioContainer.style.display = 'none';
+            return;
+        }
+
+        if (currentActiveItem) {
+            currentActiveItem.classList.remove('active-instruction');
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+        }
+
+        currentActiveItem = listItem;
+        currentActiveItem.classList.add('active-instruction');
+        audioContainer.style.display = 'block';
+        
+        audioPlayer.innerHTML = `
+            <source src="${mp3Src}" type="audio/mpeg">
+            <source src="${oggSrc}" type="audio/ogg">
+            Ваш браузер не підтримує аудіоформати MP3 чи OGG.
+        `;
+
+        audioPlayer.playbackRate = 1.0;
+        speedDisplay.textContent = '1.00';
+        
+        audioPlayer.load();
+        audioPlayer.play();
+
+        audioPlayer.onended = function() {
+            if (currentActiveItem) {
+                currentActiveItem.classList.remove('active-instruction');
+                currentActiveItem = null;
+                audioContainer.style.display = 'none';
+            }
+        };
+    }
+
+    function adjustSpeed(delta) {
+        let newSpeed = audioPlayer.playbackRate + delta;
+        if (newSpeed < 1.0) newSpeed = 1.0;
+        if (newSpeed > 2.0) newSpeed = 2.0;
+        audioPlayer.playbackRate = newSpeed;
+        speedDisplay.textContent = newSpeed.toFixed(2);
+    }
+</script>
+
+</body>
+</html>
