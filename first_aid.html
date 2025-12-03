@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Порядок надання домедичної допомоги</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #000;
+            color: #fff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 2px solid #fff;
+            padding: 30px;
+        }
+        h1 {
+            font-size: 1.5em;
+            text-align: center;
+            text-transform: uppercase;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+        .audio-item {
+            border: 1px solid #444;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .audio-item h2 {
+            margin-top: 0;
+            font-size: 1.2em;
+            border-bottom: 1px solid #222;
+            padding-bottom: 5px;
+        }
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .speed-control {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .speed-control button {
+            background-color: #fff;
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .speed-control button:hover {
+            background-color: #ccc;
+        }
+        .speed-display {
+            font-weight: bold;
+            font-size: 1.2em;
+            width: 50px;
+            text-align: center;
+        }
+        a {
+            color: #fff;
+            text-decoration: underline;
+            display: block;
+        }
+        .back-button {
+            font-size: 2.5em;
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-block;
+            padding: 5px 10px;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+        .back-button:hover {
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="index.html" class="back-button">&#10094;</a>
+        <h1>Порядок надання домедичної допомоги</h1>
+        <div id="audio-list-container"></div>
+    </div>
+
+    <script>
+    const BASE_AUDIO_URL = 'https://raw.githubusercontent.com/shylovak-spec/Audio_Assetss/main/audio/'; 
+
+    const firstAidAudios = [
+        { name: "Вступ", fileName: "first_aid_vstup" },
+        { name: "Зупинка кровообігу", fileName: "first_aid_circulation" },
+        { name: "Кровотеча", fileName: "first_aid_bleeding" },
+        { name: "Опік", fileName: "first_aid_burn" },
+        { name: "Отруєння", fileName: "first_aid_poisoning" },
+        { name: "Ушкодження очей", fileName: "first_aid_eyes" },
+        { name: "Переломи", fileName: "first_aid_fractures" },
+        { name: "Судоми", fileName: "first_aid_seizures" },
+        { name: "Ураження електричним струмом", fileName: "first_aid_electric" }
+    ];
+
+    const container = document.getElementById('audio-list-container');
+
+    if (container) {
+        let htmlContent = '';
+
+        firstAidAudios.forEach((item, index) => {
+            const itemId = `audio_${index}`;
+            const speedId = `speed_${index}`;
+            const mp3Src = `${BASE_AUDIO_URL}${item.fileName}.mp3`;
+            const oggSrc = `${BASE_AUDIO_URL}${item.fileName}.ogg`;
+
+            htmlContent += `
+                <div class="audio-item">
+                    <h2>${index + 1}. ${item.name}</h2>
+                    <audio id="${itemId}" controls preload="metadata">
+                        <source src="${mp3Src}" type="audio/mpeg">
+                        <source src="${oggSrc}" type="audio/ogg">
+                        Ваш браузер не підтримує аудіоформати MP3 чи OGG.
+                    </audio>
+                    <div class="speed-control">
+                        <span>Швидкість:</span>
+                        <div>
+                            <span id="${speedId}" class="speed-display">1.00</span>
+                            <button onclick="adjustSpeed('${itemId}', -0.25)">-</button>
+                            <button onclick="adjustSpeed('${itemId}', 0.25)">+</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = htmlContent;
+    } else {
+        console.error('❌ Не знайдено контейнер #audio-list-container');
+    }
+
+    function adjustSpeed(audioId, delta) {
+        const audio = document.getElementById(audioId);
+        const speedDisplay = document.getElementById(`speed_${audioId.split('_')[1]}`);
+        if (!audio || !speedDisplay) return;
+
+        let newSpeed = Math.min(2.0, Math.max(1.0, audio.playbackRate + delta));
+        audio.playbackRate = newSpeed;
+        speedDisplay.textContent = newSpeed.toFixed(2);
+    }
+    </script>
+
+</body>
+</html>
