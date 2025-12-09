@@ -133,23 +133,23 @@
     const audioPlayer = document.getElementById('audio-player');
     const audioContainer = document.getElementById('audio-controls-container');
     const speedDisplay = document.getElementById('speed-display');
+    const instructionListItems = document.querySelectorAll('.container li[data-file]');
     
     let currentActiveItem = null;
-
+    
     // ✅ ВИПРАВЛЕННЯ: Це тепер правильний шлях до папки 'audio/'
     const BASE_AUDIO_URL = 'https://raw.githubusercontent.com/shylovak-spec/Audio_Assetss/main/audio/';
-
-    document.querySelectorAll('#instruction-list li[data-file]').forEach(item => {
+    
+    // --- 1. Обробник кліку ---
+    instructionListItems.forEach(item => {
         item.addEventListener('click', function() {
             loadAndPlay(this.getAttribute('data-file'), this);
         });
     });
 
+    // --- 2. Функція завантаження та відтворення ---
     function loadAndPlay(fileName, listItem) {
-        // Формування повного Raw URL-адреси
-        const mp3Src = `${BASE_AUDIO_URL}${fileName}.mp3`;
-        const oggSrc = `${BASE_AUDIO_URL}${fileName}.ogg`;
-
+        // ... (Логіка перевірки та зупинки, як була)
         if (currentActiveItem === listItem && !audioPlayer.paused) {
             audioPlayer.pause();
             currentActiveItem.classList.remove('active-instruction');
@@ -168,6 +168,9 @@
         currentActiveItem.classList.add('active-instruction');
         audioContainer.style.display = 'block';
         
+        const mp3Src = `${BASE_AUDIO_URL}${fileName}.mp3`;
+        const oggSrc = `${BASE_AUDIO_URL}${fileName}.ogg`;
+
         audioPlayer.innerHTML = `
             <source src="${mp3Src}" type="audio/mpeg">
             <source src="${oggSrc}" type="audio/ogg">
@@ -179,23 +182,46 @@
         
         audioPlayer.load();
         audioPlayer.play();
+    }
 
-        audioPlayer.onended = function() {
-            if (currentActiveItem) {
-                currentActiveItem.classList.remove('active-instruction');
+    // --- 3. Логіка автоматичного перемикання ---
+    audioPlayer.onended = function() {
+        if (currentActiveItem) {
+            // Зняти активний стан з поточного елемента
+            currentActiveItem.classList.remove('active-instruction');
+
+            // Знайти індекс поточного елемента в загальному списку
+            const currentIndex = Array.from(instructionListItems).indexOf(currentActiveItem);
+
+            // Перевірити, чи є наступний елемент (не виходимо за межі списку)
+            if (currentIndex !== -1 && currentIndex < instructionListItems.length - 1) {
+                // Визначити наступний елемент
+                const nextItem = instructionListItems[currentIndex + 1];
+                
+                // Запустити його відтворення (рекурсивний виклик)
+                loadAndPlay(nextItem.getAttribute('data-file'), nextItem);
+
+            } else {
+                // Якщо це був останній елемент, приховати плеєр і скинути стан
                 currentActiveItem = null;
                 audioContainer.style.display = 'none';
             }
-        };
-    }
+        }
+    };
 
+    // --- 4. Функція зміни швидкості (винесена глобально) ---
     function adjustSpeed(delta) {
         let newSpeed = audioPlayer.playbackRate + delta;
-        if (newSpeed < 1.0) newSpeed = 1.0;
-        if (newSpeed > 1.5) newSpeed = 1.5; // Тут було обмеження 2.0
-        audioPlayer.playbackRate = newSpeed;
-        speedDisplay.textContent = newSpeed.toFixed(2);
+        // Обмеження швидкості
+        if (newSpeed < 0.75) newSpeed = 0.75;
+        if (newSpeed > 1.5) newSpeed = 1.5;
+        audioPlayer.playbackRate = newSpeed;
+        speedDisplay.textContent = newSpeed.toFixed(2);
     }
+    
+    // Щоб функція adjustSpeed була доступна з HTML-кнопок
+    window.adjustSpeed = adjustSpeed; 
+
 </script>
 
 </body>
