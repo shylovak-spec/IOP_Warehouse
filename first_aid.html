@@ -94,7 +94,7 @@
     </div>
 
     <script>
-    const BASE_AUDIO_URL = 'https://raw.githubusercontent.com/shylovak-spec/Audio_Assetss/main/audio/'; 
+    const BASE_AUDIO_URL = 'https://raw.githubusercontent.com/shylovak-spec/Audio_Assetss/main/audio/'; 
 
     const firstAidAudios = [
         { name: "Вступ", fileName: "first_aid_vstup" },
@@ -109,10 +109,11 @@
     ];
 
     const container = document.getElementById('audio-list-container');
+    const allAudioElements = []; // Масив для зберігання всіх елементів <audio>
 
+    // 1. Динамічне створення HTML та заповнення масиву
     if (container) {
         let htmlContent = '';
-
         firstAidAudios.forEach((item, index) => {
             const itemId = `audio_${index}`;
             const speedId = `speed_${index}`;
@@ -122,7 +123,7 @@
             htmlContent += `
                 <div class="audio-item">
                     <h2>${index + 1}. ${item.name}</h2>
-                    <audio id="${itemId}" controls preload="metadata">
+                    <audio id="${itemId}" data-index="${index}" controls preload="metadata">
                         <source src="${mp3Src}" type="audio/mpeg">
                         <source src="${oggSrc}" type="audio/ogg">
                         Ваш браузер не підтримує аудіоформати MP3 чи OGG.
@@ -138,22 +139,63 @@
                 </div>
             `;
         });
-
         container.innerHTML = htmlContent;
+
+        // Збір усіх елементів <audio> після вставки HTML
+        document.querySelectorAll('audio').forEach(audio => {
+            allAudioElements.push(audio);
+        });
+        
+        // 2. Додавання логіки відтворення та автоматичного перемикання
+        allAudioElements.forEach((audio, index) => {
+            // Логіка, що дозволяє відтворювати лише один трек одночасно
+            audio.addEventListener('play', () => {
+                pauseOthers(audio);
+            });
+
+            // Логіка автоматичного перемикання
+            audio.addEventListener('ended', () => {
+                const nextIndex = index + 1;
+                if (nextIndex < allAudioElements.length) {
+                    // Якщо є наступний трек, запускаємо його
+                    const nextAudio = allAudioElements[nextIndex];
+                    nextAudio.play();
+                }
+            });
+        });
+
     } else {
         console.error('❌ Не знайдено контейнер #audio-list-container');
     }
 
+    // Допоміжна функція для зупинки інших треків
+    function pauseOthers(currentAudio) {
+        allAudioElements.forEach(audio => {
+            if (audio !== currentAudio && !audio.paused) {
+                audio.pause();
+                audio.currentTime = 0; // Скидаємо час зупинених треків
+            }
+        });
+    }
+
+    // Функція зміни швидкості (винесена глобально)
     function adjustSpeed(audioId, delta) {
         const audio = document.getElementById(audioId);
-        const speedDisplay = document.getElementById(`speed_${audioId.split('_')[1]}`);
+        // Індекс елемента для динамічного пошуку display елемента
+        const index = audio ? audio.getAttribute('data-index') : null; 
+        const speedDisplay = index !== null ? document.getElementById(`speed_${index}`) : null;
+        
         if (!audio || !speedDisplay) return;
 
-        let newSpeed = Math.min(2.0, Math.max(1.0, audio.playbackRate + delta));
+        let newSpeed = Math.min(1.5, Math.max(1.0, audio.playbackRate + delta));
         audio.playbackRate = newSpeed;
         speedDisplay.textContent = newSpeed.toFixed(2);
     }
-    </script>
+
+    // Щоб функція adjustSpeed була доступна з HTML-кнопок
+    window.adjustSpeed = adjustSpeed;
+    
+</script>
 
 </body>
 </html>
