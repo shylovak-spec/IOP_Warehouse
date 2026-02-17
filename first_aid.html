@@ -9,92 +9,117 @@
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 10px; /* Мінімальні відступи по краях */
             background-color: #000;
             color: #fff;
         }
         .container {
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
-            border: 2px solid #fff;
-            padding: 30px;
-        }
-        h1 {
-            font-size: 1.5em;
-            text-align: center;
-            text-transform: uppercase;
-            color: #fff;
-            margin-bottom: 30px;
         }
         .audio-item {
-            border: 1px solid #444;
+            border: 1px solid #333;
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            background-color: #111;
         }
         .audio-item h2 {
             margin-top: 0;
-            font-size: 1.2em;
-            border-bottom: 1px solid #222;
-            padding-bottom: 5px;
+            font-size: 1.05em;
+            margin-bottom: 12px;
+            color: #fff; /* Назву треку */
         }
         audio {
-            width: 100%;
-            margin-top: 10px;
+            width: 100%; /* Тепер плеєр займає всю ширину */
+            height: 45px;
+            filter: invert(100%); /* Робимо плеєр світлим */
+            margin-bottom: 10px;
+        }
+        audio::-webkit-media-controls-enclosure {
+            overflow: hidden;
+        }
+        audio::-webkit-media-controls-panel {
+            width: calc(100% + 30px); /* Зміщуємо меню за межі видимості */
         }
         .speed-control {
-            margin-top: 10px;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: space-between;
+            border-top: 1px solid #222;
+            padding-top: 10px;
+            margin-top: 5px;
+        }
+        .speed-display-label {
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        .speed-display {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #fff;
+            margin-left: 5px;
+        }
+        .speed-btn-group {
+            display: flex;
+            gap: 12px;
         }
         .speed-control button {
             background-color: #fff;
             color: #000;
             border: none;
-            padding: 8px 15px;
+            width: 30px; /* Велика область для натискання */
+            height: 30px;
             cursor: pointer;
-            margin-left: 10px;
             font-weight: bold;
-            font-size: 1.1em;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .speed-control button:hover {
-            background-color: #ccc;
-        }
-        .speed-display {
-            font-weight: bold;
-            font-size: 1.2em;
-            width: 50px;
-            text-align: center;
-        }
-        a {
-            color: #fff;
-            text-decoration: underline;
-            display: block;
-        }
-        .back-button {
-            font-size: 2.5em;
-            text-decoration: none;
-            font-weight: 700;
-            display: inline-block;
-            padding: 5px 10px;
-            margin-bottom: 20px;
-            transition: color 0.2s;
-        }
-        .back-button:hover {
-            color: #ccc;
-        }
+        /* Контейнер для стрілки та заголовка */
+.header-row {
+    display: flex;
+    align-items: center; /* Вирівнювання по вертикалі */
+    justify-content: flex-start; /* Елементи йдуть один за одним */
+    gap: 15px; /* Відступ між стрілкою та текстом */
+    margin-bottom: 20px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+.back-button {
+    font-size: 2em;
+    text-decoration: none;
+    color: #fff;
+    font-weight: 700;
+    line-height: 1; /* Прибирає зайву висоту рядка */
+    display: block;
+    margin-top: -4px;
+}
+
+h1 {
+    font-size: 1.1em;
+    text-transform: uppercase;
+    color: #fff;
+    margin: 0; /* Прибираємо стандартні відступи */
+    flex: 1; /* Дозволяє заголовку займати вільний простір */
+    text-align: left; /* Текст тепер зліва, поруч зі стрілкою */
+}
     </style>
 </head>
 <body>
 
     <div class="container">
+    <div class="header-row">
         <a href="index.html" class="back-button">&#10094;</a>
         <h1>Порядок надання домедичної допомоги</h1>
-        <div id="audio-list-container"></div>
     </div>
+    
+    <div id="audio-list-container"></div>
+</div>
 
     <script>
-    const BASE_AUDIO_URL = 'https://raw.githubusercontent.com/shylovak-spec/Audio_Assetss/main/audio/'; 
+    const BASE_AUDIO_URL = 'https://raw.githubusercontent.com/shylovak-spec/Audio_Assetss/main/audio/'; 
 
     const firstAidAudios = [
         { name: "Вступ", fileName: "first_aid_vstup" },
@@ -109,29 +134,25 @@
     ];
 
     const container = document.getElementById('audio-list-container');
-    const allAudioElements = []; // Масив для зберігання всіх елементів <audio>
+    const allAudioElements = [];
 
-    // 1. Динамічне створення HTML та заповнення масиву
     if (container) {
         let htmlContent = '';
         firstAidAudios.forEach((item, index) => {
             const itemId = `audio_${index}`;
             const speedId = `speed_${index}`;
             const mp3Src = `${BASE_AUDIO_URL}${item.fileName}.mp3`;
-            const oggSrc = `${BASE_AUDIO_URL}${item.fileName}.ogg`;
 
+            // ЗМІНЕНО: Нова смтруктура HTML для широкого плеєра
             htmlContent += `
                 <div class="audio-item">
-                    <h2>${index + 1}. ${item.name}</h2>
-                    <audio id="${itemId}" data-index="${index}" controls preload="metadata">
-                        <source src="${mp3Src}" type="audio/mpeg">
-                        <source src="${oggSrc}" type="audio/ogg">
-                        Ваш браузер не підтримує аудіоформати MP3 чи OGG.
-                    </audio>
+                <h2>${index + 1}. ${item.name}</h2>
+                <audio id="${itemId}" data-index="${index}" controls controlsList="nodownload noplaybackrate" preload="metadata">
+                <source src="${mp3Src}" type="audio/mpeg">
+                </audio>
                     <div class="speed-control">
-                        <span>Швидкість:</span>
-                        <div>
-                            <span id="${speedId}" class="speed-display">1.00</span>
+                        <span class="speed-display-label">Швидкість: <span id="${speedId}" class="speed-display">1.00</span></span>
+                        <div class="speed-btn-group">
                             <button onclick="adjustSpeed('${itemId}', -0.25)">-</button>
                             <button onclick="adjustSpeed('${itemId}', 0.25)">+</button>
                         </div>
@@ -141,60 +162,44 @@
         });
         container.innerHTML = htmlContent;
 
-        // Збір усіх елементів <audio> після вставки HTML
         document.querySelectorAll('audio').forEach(audio => {
             allAudioElements.push(audio);
         });
         
-        // 2. Додавання логіки відтворення та автоматичного перемикання
         allAudioElements.forEach((audio, index) => {
-            // Логіка, що дозволяє відтворювати лише один трек одночасно
-            audio.addEventListener('play', () => {
-                pauseOthers(audio);
-            });
-
-            // Логіка автоматичного перемикання
+            audio.addEventListener('play', () => pauseOthers(audio));
             audio.addEventListener('ended', () => {
                 const nextIndex = index + 1;
                 if (nextIndex < allAudioElements.length) {
-                    // Якщо є наступний трек, запускаємо його
-                    const nextAudio = allAudioElements[nextIndex];
-                    nextAudio.play();
+                    allAudioElements[nextIndex].play();
                 }
             });
         });
 
-    } else {
-        console.error('❌ Не знайдено контейнер #audio-list-container');
     }
 
-    // Допоміжна функція для зупинки інших треків
     function pauseOthers(currentAudio) {
         allAudioElements.forEach(audio => {
             if (audio !== currentAudio && !audio.paused) {
                 audio.pause();
-                audio.currentTime = 0; // Скидаємо час зупинених треків
+                audio.currentTime = 0;
             }
         });
     }
 
-    // Функція зміни швидкості (винесена глобально)
     function adjustSpeed(audioId, delta) {
         const audio = document.getElementById(audioId);
-        // Індекс елемента для динамічного пошуку display елемента
         const index = audio ? audio.getAttribute('data-index') : null; 
         const speedDisplay = index !== null ? document.getElementById(`speed_${index}`) : null;
         
         if (!audio || !speedDisplay) return;
 
-        let newSpeed = Math.min(1.5, Math.max(1.0, audio.playbackRate + delta));
+        let newSpeed = Math.min(1.5, Math.max(0.5, audio.playbackRate + delta));
         audio.playbackRate = newSpeed;
         speedDisplay.textContent = newSpeed.toFixed(2);
     }
 
-    // Щоб функція adjustSpeed була доступна з HTML-кнопок
     window.adjustSpeed = adjustSpeed;
-    
 </script>
 
 </body>
