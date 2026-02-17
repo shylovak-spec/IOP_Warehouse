@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестування - Охорона Праці</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #000;
+            color: #fff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 2px solid #fff;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 1.5em;
+            text-align: center;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #fff;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin-bottom: 30px;
+        }
+        label.main-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #111;
+            border: 1px solid #fff;
+            color: #fff;
+            font-size: 1.1em;
+            box-sizing: border-box;
+        }
+        .question {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px dashed #444;
+        }
+        .question p {
+            font-size: 1.1em;
+            margin-top: 0;
+            font-weight: bold;
+        }
+        .options label {
+            display: block;
+            font-weight: normal;
+            font-size: 1em;
+            cursor: pointer;
+            padding: 8px;
+            transition: background 0.2s;
+        }
+        .options label:hover {
+            background: #222;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background-color: #ffcc00;
+            color: #000;
+            padding: 15px;
+            border: none;
+            font-weight: bold;
+            font-size: 1.2em;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        .btn-submit:hover:not(:disabled) {
+            background-color: #e6b800;
+        }
+        .btn-submit:disabled {
+            background-color: #555 !important;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #ccc;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="index.html" class="back-link">← Назад до інструкцій</a>
+    <h1>Тестування знань</h1>
+
+    <form id="quiz-form">
+        <div class="input-group">
+            <label for="surname" class="main-label">Ваше Прізвище:</label>
+            <input type="text" id="surname" name="surname" required placeholder="Введіть прізвище...">
+        </div>
+
+        <div id="questions-container"></div>
+
+        <button type="submit" class="btn-submit" id="submit-btn">Відправити результат</button>
+    </form>
+</div>
+
+<script>
+    // 1. Повний список питань (20 штук)
+    const allQuestions = [
+        {
+           q: "Яка мінімальна ширина проїзду має бути для навантажувача при двосторонньому русі?",
+           options: ["1.8 м", "2.5 м", "3 м"],
+           correct: 2
+        },
+        {
+           q: "На якій мінімальній відстані потрібно об'їжджати переносні драбини з людьми?",
+           options: ["0.5 м", "1 м", "2 м"],
+           correct: 1
+        },
+        {
+           q: "Що необхідно зробити, якщо потрібно залишити навантажувач на деякий час?",
+           options: ["Опустити каретку вантажопідіймача та взяти ключ із собою", "Залишити вила в піднятому положенні для видимості", "Залишити двигун увімкненим"],
+           correct: 0
+        },
+        {
+           q: "Чи дозволяється комірнику самостійно ремонтувати складське обладнання?",
+           options: ["Так, якщо поломка незначна", "Ні, це заборонено", "Тільки за згодою колег"],
+           correct: 1
+        },
+        {
+           q: "Якою має бути підлога, по якій переміщуються вантажі?",
+           options: ["Будь-якою", "Похилою для легкого скочування", "Рівною, без вибоїн та слизьких поверхонь"],
+           correct: 2
+        },
+        {
+           q: "Коли працівник може приступити до роботи з обладнанням?",
+           options: ["Одразу після приходу", "Тільки після перевірки його технічної справності", "Якщо попередня зміна сказала, що все добре"],
+           correct: 1
+        },
+        {
+           q: "Що потрібно зробити при виявленні порушень охорони праці перед початком робіт?",
+           options: ["Повідомити керівника і не приступати до роботи до усунення недоліків", "Почати працювати обережно", "Спробувати виправити самому"],
+           correct: 0
+        },
+        {
+            q: "Як необхідно переміщати великовагові штучні матеріали та ящики?",
+            options: ["Тільки вручну", "За допомогою ломів по підкладках або катках", "Штовхаючи по підлозі"],
+            correct: 1
+        },
+        {
+            q: "Яка мінімальна ширина проходу має бути між штабелями вантажів?",
+            options: ["1.5 м", "0.5 м", "1 м"],
+            correct: 2
+        },
+        {
+            q: "Де потрібно знаходитись при підводі катків під вантаж?",
+            options: ["Попереду вантажу", "Збоку", "Позаду"],
+            correct: 1
+        },
+        {
+            q: "Чи потрібно повідомляти керівника про незначну травму?",
+            options: ["Ні, якщо не болить", "Обов'язково повідомити", "Тільки якщо потрібен лікарняний"],
+            correct: 1
+        },
+        {
+            q: "Що зобов'язаний зробити комірник при виявленні несправності стелажа?",
+            options: ["Самостійно підтягнути болти", "Продовжити роботу обережно", "Припинити роботу та повідомити керівника"],
+            correct: 2
+        },
+        {
+            q: "Яка вимога до освітлення складських приміщень перед початком робіт?",
+            options: ["Освітлення має бути достатнім для безпечного виконання робіт", "Можна працювати з ліхтариком телефону", "Достатньо світла з відчинених дверей"],
+            correct: 0
+        },
+        {
+            q: "Що заборонено робити при гасінні електроустановок під напругою?",
+            options: ["Використовувати пісок", "Використовувати воду", "Використовувати вуглекислотний вогнегасник"],
+            correct: 1
+        },
+        {
+            q: "Що має зробити керівник, якщо працівнику на платформі стало зле?",
+            options: ["Негайно евакуювати з висоти та надати допомогу", "Дати відпочити на висоті", "Сказати спускатися самостійно пішки"],
+            correct: 0
+        },
+        {
+            q: "Як часто потрібно перевіряти справність ручного електроінструмента?",
+            options: ["Раз на рік", "Тільки якщо він перестав вмикатися", "Перед кожним початком роботи"],
+            correct: 2
+        },
+        {
+            q: "Яка основна вимога до проходів у зоні виконання робіт?",
+            options: ["Вони можуть бути тимчасово захаращені порожньою тарою", "Вони повинні бути завжди вільними для руху", "Проходи потрібні тільки для техніки"],
+            correct: 1
+        },
+        {
+            q: "Що потрібно зробити перед використанням драбини чи підмостків?",
+            options: ["Перевірити дату останнього випробування та стійкість", "Протерти їх від пилу", "Якщо нові можна не перевіряти"],
+            correct: 0
+        },
+        {
+            q: "Чи дозволено залишати вантаж у піднятому стані без нагляду?",
+            options: ["Так, якщо під ним ніхто не ходить", "Тільки на короткий час (до 5 хв)", "Ні, це суворо заборонено"],
+            correct: 2
+        },
+        {
+            q: "Яким є співвідношення натискань на грудну клітку та вдихів при проведені серцево-легеневої реанімації?",
+            options: ["15 натискань / 5 вдихів", "30 натискань / 2 вдихи", "10 натискань / 1 вдих"],
+            correct: 1
+        }
+    ];
+
+    function getRandomQuestions(arr, n) {
+        let shuffled = [...arr].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, n);
+    }
+
+    const selectedQuestions = getRandomQuestions(allQuestions, 5);
+    const container = document.getElementById('questions-container');
+
+    selectedQuestions.forEach((item, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question';
+        
+        let optionsHTML = '';
+        item.options.forEach((opt, optIndex) => {
+            optionsHTML += `
+                <label>
+                    <input type="radio" name="q${index}" value="${optIndex}" required>
+                    ${opt}
+                </label>
+            `;
+        });
+
+        questionDiv.innerHTML = `
+            <p>${index + 1}. ${item.q}</p>
+            <div class="options">${optionsHTML}</div>
+        `;
+        container.appendChild(questionDiv);
+    });
+
+    document.getElementById('quiz-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('submit-btn');
+        const surname = document.getElementById('surname').value;
+        
+        submitBtn.disabled = true;
+        submitBtn.innerText = "ВІДПРАВКА...";
+
+        let score = 0;
+        selectedQuestions.forEach((item, index) => {
+            const selectedAnswer = document.querySelector(`input[name="q${index}"]:checked`).value;
+            if (parseInt(selectedAnswer) === item.correct) {
+                score++;
+            }
+        });
+
+        const percentage = Math.round((score / selectedQuestions.length) * 100);
+        const data = { surname: surname, percentage: percentage };
+
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbym9t3VZsje9hXUHVi53YfycBrRNPsQgrSQjPaASL1aovLhmAzoZlyT5xhDG9GCPT3f/exec';
+
+        fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(() => {
+            submitBtn.innerText = "ГОТОВО!";
+            submitBtn.style.backgroundColor = "#28a745"; 
+            
+            setTimeout(() => {
+                alert(`Дякуємо! Ваш результат: ${percentage}%. Дані збережено.`);
+                window.location.href = 'index.html';
+            }, 500);
+        })
+        .catch(error => {
+            console.error('Помилка!', error);
+            alert('Сталася помилка при відправці.');
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Відправити результат";
+        });
+    });
+</script>
+
+</body>
+</html>
